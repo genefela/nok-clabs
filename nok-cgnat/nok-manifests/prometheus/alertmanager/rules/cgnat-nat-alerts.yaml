@@ -1,0 +1,85 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cgnat-nat-alerts
+  namespace: nok-cgnat
+  labels:
+    role: alert-rules
+spec:
+  groups:
+  - name: cgnat-nat
+    rules:
+    - alert: NatGroupDegraded
+      expr: state_isa_nat_group_degraded == 1
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "NAT group degraded on {{ $labels.source }}"
+        description: "Alert from metric A2. Syslog NAT#2025 duplicates this; do not page on the log line."
+
+    - alert: NatMemberSessionHigh
+      expr: state_isa_nat_group_member_high_session_usage == 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "NAT member session watermark on {{ $labels.source }}"
+        description: "Device watermark B2. Correlate syslog NAT#2002 with session-usage."
+
+    - alert: NatPoolBlockHigh
+      expr: |
+        state_router_nat_outside_pool_large_scale_group_member_high_watermark_reached == 1
+        or state_service_vprn_nat_outside_pool_large_scale_group_member_high_watermark_reached == 1
+      for: 1m
+      labels:
+        severity: major
+      annotations:
+        summary: "NAT pool port-block watermark on {{ $labels.source }}"
+        description: "Device watermark B9. Correlate syslog NAT#2003 with pool block-usage."
+
+    - alert: NatFlowCreateFailed
+      expr: |
+        sum by (source) (
+          increase(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_no_resources[5m])
+          or increase(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_no_resources[5m])
+          or increase(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_no_ip_or_port_resources[5m])
+          or increase(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_no_ip_or_port_resources[5m])
+          or increase(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_no_host_resources[5m])
+          or increase(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_no_host_resources[5m])
+          or increase(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_max_flows_exceeded[5m])
+          or increase(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_max_flows_exceeded[5m])
+        ) > 0
+      for: 2m
+      labels:
+        severity: major
+      annotations:
+        summary: "CG-NAT is refusing new flows on {{ $labels.source }}"
+        description: "D1 capacity class (no-resources / no-ip-or-port / no-host / max-flows). This is the customer-visible SLI numerator."
+
+    - alert: NatFlowLogRateLimit
+      expr: |
+        sum by (source) (
+          increase(state_isa_nat_group_esa_statistics_nat_flow_log_rate_limit_drop[5m])
+          or increase(state_isa_nat_group_mda_statistics_nat_flow_log_rate_limit_drop[5m])
+        ) > 0
+      for: 1m
+      labels:
+        severity: major
+      annotations:
+        summary: "NAT flow-log pipeline dropping records on {{ $labels.source }}"
+        description: "D3. If the log path stalls, SR OS denies new flows. Fix the collector, not the pool."
+
+    - alert: NatIcrFlowsNotSynced
+      expr: |
+        (
+          state_isa_nat_group_member_inter_chassis_redundancy_tracked_flows_not_synced
+          /
+          clamp_min(state_isa_nat_group_member_inter_chassis_redundancy_tracked_flows, 1)
+        ) > 0.05
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "SICR tracked flows not synced on {{ $labels.source }}"
+        description: "F2. Fraction of sessions that would break if switchover happened now."

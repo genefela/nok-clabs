@@ -1,0 +1,10 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cgnat-pools-and-dslite
+  namespace: nok-cgnat
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  url: "https://raw.githubusercontent.com/CSPDevLabs/nok-clabs/refs/heads/main/nok-cgnat/grafana-dashboards/cgnat-pools-and-dslite.json"

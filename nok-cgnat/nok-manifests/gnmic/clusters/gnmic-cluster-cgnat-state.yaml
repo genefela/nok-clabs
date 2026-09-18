@@ -1,0 +1,8 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Cluster
+metadata:
+  namespace: nok-cgnat
+  name: cgnat-state
+spec:
+  replicas: 1
+  image: ghcr.io/openconfig/gnmic:latest

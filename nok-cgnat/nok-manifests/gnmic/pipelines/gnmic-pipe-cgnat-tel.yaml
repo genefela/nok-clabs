@@ -1,0 +1,21 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Pipeline
+metadata:
+  namespace: nok-cgnat
+  name: cgnat-tel
+spec:
+  clusterRef: cgnat-metrics
+  enabled: true
+  targetSelectors:
+    - matchLabels:
+        vendor: Nokia
+        role: cgnat
+  subscriptionSelectors:
+    - matchLabels:
+        type: cgnat
+  outputs:
+    outputSelectors:
+      - matchLabels:
+          type: cgnat-ext-output
+    processorRefs:
+      - oper-state-to-int

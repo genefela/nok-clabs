@@ -1,0 +1,17 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Output
+metadata:
+  namespace: nok-cgnat
+  name: op-fluent
+  labels:
+    type: cgnat-state
+spec:
+  type: tcp
+  config:
+    address: "tel-fb:6000"
+    format: json  
+    rate: 10ms 
+    keep-alive: 30s
+    retry-interval: 30s
+    enable-metrics: false 
+    delimiter: "\n"    

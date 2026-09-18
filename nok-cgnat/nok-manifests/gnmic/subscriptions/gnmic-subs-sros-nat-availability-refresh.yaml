@@ -1,0 +1,25 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Subscription
+metadata:
+  namespace: nok-cgnat
+  name: sros-nat-availability-refresh
+  labels:
+    type: cgnat
+spec:
+  paths:
+    - /state/isa/nat-group[id=*]/oper-state
+    - /state/isa/nat-group[id=*]/degraded
+    - /state/isa/nat-group[id=*]/member[id=*]/state
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/oper-state
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/oper-state
+    - /state/esa[esa-id=*]/vm[vm-id=*]/oper-state
+    - /state/card[slot-number=*]/mda[mda-slot=*]/hardware-data/oper-state
+    - /state/isa/nat-group[id=*]/member[id=*]/high-session-usage
+    - /state/isa/nat-group[id=*]/redundancy/inter-chassis/state
+    - /state/isa/nat-group[id=*]/redundancy/inter-chassis/in-control
+    - /state/isa/nat-group[id=*]/member[id=*]/inter-chassis-redundancy/state
+    - /state/router[router-name=*]/nat/outside/pool[name=*]/large-scale/group-member[group-member=*]/high-watermark-reached
+    - /state/service/vprn[service-name=*]/nat/outside/pool[name=*]/large-scale/group-member[group-member=*]/high-watermark-reached
+  mode: STREAM/SAMPLE
+  encoding: JSON
+  sampleInterval: 240s

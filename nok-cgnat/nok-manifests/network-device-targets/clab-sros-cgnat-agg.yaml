@@ -1,0 +1,29 @@
+apiVersion: nok.dev/v1alpha1
+kind: NetworkDeviceTarget
+metadata:
+  name: clab-sros-cgnat-agg
+  namespace: nok-cgnat
+spec:
+  address: 172.21.30.13
+  hostname: clab-sros-cgnat-agg
+  commonLabels:
+    vendor: Nokia
+    environment: lab
+  sdcio:
+    enabled: true
+    credentialsSecretRef: device-credentials
+    connectionProfileRef: gnmi-skipverify
+    syncProfileRef: gnmi-get
+    schema:
+      provider: sros.nokia.sdcio.dev
+      version: B-25.10.R1
+    labels:
+      sdcio.dev/region: lab
+      sdcio.dev/role: cgnat-core
+  gnmic:
+    enabled: true
+    credentialsSecretRef: device-credentials
+    targetProfileRef: default-profile
+    port: "57400"
+    labels:
+      role: cgnat-core

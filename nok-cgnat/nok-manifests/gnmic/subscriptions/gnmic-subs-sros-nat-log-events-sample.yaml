@@ -1,0 +1,14 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Subscription
+metadata:
+  namespace: nok-cgnat
+  name: sros-nat-log-events-sample
+  labels:
+    type: cgnat
+spec:
+  paths:
+    - /state/log/log-events/nat[event=*]/statistics/count
+    - /state/log/log-events/nat[event=*]/statistics/drop
+  mode: STREAM/SAMPLE
+  encoding: JSON
+  sampleInterval: 60s

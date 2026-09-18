@@ -1,0 +1,144 @@
+name: sros-cgnat
+
+mgmt:
+  network: cgnat
+  ipv4-subnet: 172.21.30.0/24
+
+topology:
+  nodes:
+
+    cgnat1:
+      kind: nokia_srsim
+      image: registry.srlinux.dev/pub/nokia_srsim:25.10.R1
+      type: sr-1s
+      license: srsim-lic-25.txt
+      mgmt-ipv4: 172.21.30.11
+      startup-config: configs/ne/cgnat1.txt
+      group: ne
+
+    cgnat2:
+      kind: nokia_srsim
+      image: registry.srlinux.dev/pub/nokia_srsim:25.10.R1
+      type: sr-1s
+      license: srsim-lic-25.txt
+      mgmt-ipv4: 172.21.30.12
+      startup-config: configs/ne/cgnat2.txt
+      group: ne
+
+    core:
+      kind: nokia_srsim
+      image: registry.srlinux.dev/pub/nokia_srsim:25.10.R1
+      type: sr-1
+      license: srsim-lic-25.txt
+      mgmt-ipv4: 172.21.30.21
+      startup-config: configs/ne/core.txt
+      group: ne
+
+    agg:
+      kind: nokia_srsim
+      image: registry.srlinux.dev/pub/nokia_srsim:25.10.R1
+      type: sr-1
+      license: srsim-lic-25.txt
+      mgmt-ipv4: 172.21.30.13
+      startup-config: configs/ne/agg.txt
+      group: ne
+
+    inet:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.112
+      binds:
+        - configs/hosts/inet.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 10
+      restart-policy: unless-stopped
+
+    cpe1:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.121
+      env:
+        CPE_INDEX: "1"
+      binds:
+        - configs/hosts/cpe.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 15
+      restart-policy: unless-stopped
+
+    cpe2:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.122
+      env:
+        CPE_INDEX: "2"
+      binds:
+        - configs/hosts/cpe.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 15
+      restart-policy: unless-stopped
+
+    cpe3:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.123
+      env:
+        CPE_INDEX: "3"
+      binds:
+        - configs/hosts/cpe.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 15
+      restart-policy: unless-stopped
+
+    lan1:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.131
+      env:
+        IPERF_PORT: "5201"
+      binds:
+        - configs/hosts/lan.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 25
+      restart-policy: unless-stopped
+
+    lan2:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.132
+      env:
+        IPERF_PORT: "5202"
+      binds:
+        - configs/hosts/lan.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 25
+      restart-policy: unless-stopped
+
+    lan3:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.133
+      env:
+        IPERF_PORT: "5203"
+      binds:
+        - configs/hosts/lan.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 25
+      restart-policy: unless-stopped
+
+  links:
+    # Access dual-home via L2 aggregation (CPEs + both CG-NATs)
+    - endpoints: ["cgnat1:1/1/c1/1", "agg:1/1/c1/1"]
+    - endpoints: ["cgnat2:1/1/c1/1", "agg:1/1/c2/1"]
+    - endpoints: ["cpe1:eth1", "agg:1/1/c3/1"]
+    - endpoints: ["cpe2:eth1", "agg:1/1/c4/1"]
+    - endpoints: ["cpe3:eth1", "agg:1/1/c5/1"]
+    # Customer LAN (identical 192.168.1.0/24 behind each B4)
+    - endpoints: ["lan1:eth1", "cpe1:eth2"]
+    - endpoints: ["lan2:eth1", "cpe2:eth2"]
+    - endpoints: ["lan3:eth1", "cpe3:eth2"]
+    # Core / public IPv4
+    - endpoints: ["cgnat1:1/1/c2/1", "core:1/1/c1/1"]
+    - endpoints: ["cgnat2:1/1/c2/1", "core:1/1/c2/1"]
+    - endpoints: ["inet:eth1", "core:1/1/c3/1"]
+    # Inter-chassis link (CPM MCS + ISA-to-ISA flow sync)
+    - endpoints: ["cgnat1:1/1/c3/1", "cgnat2:1/1/c3/1"]

@@ -10,4 +10,5 @@ promdata/*
 *.gz
 *lic*.txt
 clab-sros-bngt/
+clab-sros-cgnat/
 

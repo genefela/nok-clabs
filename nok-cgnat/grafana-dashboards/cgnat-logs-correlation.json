@@ -1,0 +1,213 @@
+{
+  "id": null,
+  "uid": "cgnat-logs-xpath",
+  "title": "CG-NAT logs and XPath correlation",
+  "tags": [
+    "cgnat",
+    "logs"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "NAT events (duplicate + log-only)",
+        "datasource": {
+          "type": "loki",
+          "uid": "DS_LOKI"
+        },
+        "enable": true,
+        "expr": "{job=\"syslog\", application=\"NAT\", event_id=~\"2003|2014|2015|2023|2024|2025|2040|2043\"}",
+        "tagKeys": "event_id,source"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "NAT event log (local5 / application=NAT)",
+      "type": "logs",
+      "gridPos": {
+        "h": 10,
+        "w": 16,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "DS_LOKI"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"syslog\", application=\"NAT\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "DS_LOKI"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "A2 degraded vs B2 high-session (metric, not syslog)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_degraded",
+          "legendFormat": "{{source}} degraded",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_member_high_session_usage",
+          "legendFormat": "{{source}} high-session",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Log-only events (2015, 2023, 2040, 2043, 2022, 2036, 2018, 2035, 2048)",
+      "type": "logs",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "DS_LOKI"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"syslog\", application=\"NAT\", event_id=~\"2015|2018|2022|2023|2031|2034|2035|2036|2040|2041|2042|2043|2047|2048\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "DS_LOKI"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "ISA per-flow records (local6)",
+      "type": "logs",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "DS_LOKI"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"syslog\", facility=~\"local6|22\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "DS_LOKI"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "G1 log-event count / drop (completeness)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "increase(state_log_log_events_nat_statistics_count[5m])",
+          "legendFormat": "{{source}} {{event}} count",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "increase(state_log_log_events_nat_statistics_drop[5m])",
+          "legendFormat": "{{source}} {{event}} drop",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "Duplicate-metric events (do not alert; use as markers) 2002/2003/2014/2024/2025",
+      "type": "logs",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "DS_LOKI"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"syslog\", application=\"NAT\", event_id=~\"2002|2003|2014|2015|2020|2024|2025|2037|2039\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "DS_LOKI"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+# Nokia SR OS MD-CLI — core PE for the CG-NAT digital twin
+# Routes public IPv4 (internet 198.51.100.0/24) and the NAT outside pool 203.0.113.0/24.
+
+configure {
+    card 1 {
+        card-type iom-1
+        mda 1 {
+            mda-type me6-100gb-qsfp28
+        }
+    }
+    log {
+        log-id "10" {
+            admin-state enable
+            source {
+                main true
+                security true
+                change true
+            }
+            destination {
+                syslog "promtail"
+            }
+        }
+        syslog "promtail" {
+            address 172.18.0.104
+            facility local7
+            severity info
+            port 1514
+            hostname {
+                use-system-name { }
+            }
+        }
+    }
+    port 1/1/c1 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c1/1 {
+        admin-state enable
+        ethernet { mode network encap-type null }
+    }
+    port 1/1/c2 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c2/1 {
+        admin-state enable
+        ethernet { mode network encap-type null }
+    }
+    port 1/1/c3 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c3/1 {
+        admin-state enable
+        ethernet { mode network encap-type null }
+    }
+    router "Base" {
+        autonomous-system 65001
+        interface "TO-CGNAT1" {
+            port 1/1/c1/1
+            ipv4 {
+                primary { address 192.0.2.2 prefix-length 30 }
+            }
+        }
+        interface "TO-CGNAT2" {
+            port 1/1/c2/1
+            ipv4 {
+                primary { address 192.0.2.6 prefix-length 30 }
+            }
+        }
+        interface "INET" {
+            port 1/1/c3/1
+            ipv4 {
+                primary { address 198.51.100.1 prefix-length 24 }
+            }
+        }
+        interface "system" {
+            admin-state enable
+            ipv4 {
+                primary { address 10.0.0.4 prefix-length 32 }
+            }
+        }
+        static-route-entry 203.0.113.0/24 {
+            next-hop 192.0.2.1 { preference 10 }
+            next-hop 192.0.2.5 { preference 20 }
+        }
+        isis 0 {
+            admin-state enable
+            level-capability 2
+            area-address [49.0001]
+            interface "TO-CGNAT1" { interface-type point-to-point }
+            interface "TO-CGNAT2" { interface-type point-to-point }
+            interface "system" { passive true }
+        }
+    }
+    system {
+        name "CORE"
+        grpc {
+            admin-state enable
+            allow-unsecure-connection
+        }
+        management-interface {
+            cli {
+                md-cli { auto-config-save true }
+            }
+            netconf {
+                listen { admin-state enable }
+            }
+        }
+    }
+}

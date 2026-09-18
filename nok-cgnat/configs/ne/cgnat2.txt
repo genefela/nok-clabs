@@ -1,0 +1,331 @@
+# Nokia SR OS MD-CLI — CGNAT2 (DS-Lite AFTR, non-preferred SICR peer)
+# Identical NAT policy/pool/AFTR to CGNAT1. preferred false; ISA IP ranges swapped.
+
+configure {
+    card 1 {
+        card-type xcm-1s
+        mda 1 {
+            mda-type s36-100gb-qsfp28
+        }
+    }
+    chassis router chassis-number 1 {
+        power-shelf 1 {
+            power-shelf-type ps-a4-shelf-dc
+            power-module 1 { power-module-type ps-a-dc-6000 }
+            power-module 2 { power-module-type ps-a-dc-6000 }
+            power-module 3 { power-module-type ps-a-dc-6000 }
+            power-module 4 { power-module-type ps-a-dc-6000 }
+        }
+    }
+    esa 1 {
+        admin-state enable
+        vm 1 {
+            vm-type bb
+            cores 4
+            memory 8
+        }
+    }
+    isa {
+        nat-group 1 {
+            admin-state enable
+            description "DS-Lite AFTR with stateful inter-chassis redundancy"
+            redundancy {
+                active-mda-limit 1
+                inter-chassis {
+                    admin-state enable
+                    router-instance "Base"
+                    local-ip-range-start 10.192.4.1
+                    remote-ip-range-start 10.192.3.1
+                    ip-mtu 9000
+                    keepalive {
+                        interval 30
+                        dropcount 3
+                    }
+                    replication-threshold 50
+                    flow-timeout-on-switchover 50
+                    preferred false
+                    sync true
+                }
+            }
+            session-limits {
+                watermarks {
+                    high 90
+                    low 80
+                }
+            }
+            esa 1 {
+                vm 1
+            }
+        }
+    }
+    log {
+        filter "50" {
+            default-action drop
+            named-entry "10" {
+                action forward
+                match {
+                    application {
+                        eq nat
+                    }
+                }
+            }
+        }
+        log-events {
+            nat {
+                event tmnxNatIsaGrpIsDegraded {
+                    severity critical
+                }
+                event tmnxNatMaxNbrSubsOrHostsExceeded {
+                    severity major
+                }
+                event tmnxNatPlLsnMemberBlockUsageHigh {
+                    severity major
+                }
+                event tmnxNatLsnSubIcmpPortUsgHigh {
+                    throttle true
+                }
+                event tmnxNatLsnSubUdpPortUsgHigh {
+                    throttle true
+                }
+                event tmnxNatLsnSubTcpPortUsgHigh {
+                    throttle true
+                }
+                event tmnxNatLsnSubSessionUsgHigh {
+                    throttle true
+                }
+            }
+        }
+        syslog "nat-events" {
+            address 172.18.0.104
+            facility local5
+            severity info
+            log-prefix "AFTR"
+            port 1514
+            hostname {
+                use-system-name { }
+            }
+        }
+        log-id "50" {
+            admin-state enable
+            filter "50"
+            source {
+                main true
+            }
+            destination {
+                syslog "nat-events"
+            }
+        }
+        log-id "99" {
+            description "Default System Log"
+            source {
+                main true
+            }
+            destination {
+                memory {
+                    max-entries 500
+                }
+            }
+        }
+    }
+    port 1/1/c1 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c1/1 {
+        admin-state enable
+        ethernet {
+            mode network
+            encap-type null
+        }
+    }
+    port 1/1/c2 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c2/1 {
+        admin-state enable
+        ethernet {
+            mode network
+            encap-type null
+        }
+    }
+    port 1/1/c3 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c3/1 {
+        admin-state enable
+        ethernet {
+            mode network
+            encap-type null
+            mtu 9000
+        }
+    }
+    redundancy {
+        multi-chassis {
+            peer 10.0.0.2 {
+                admin-state enable
+                source-address 10.0.0.3
+                sync {
+                    admin-state enable
+                    nat {
+                        nat-group 1 {
+                            sync-tag "dslite-nat"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    router "Base" {
+        autonomous-system 65001
+        interface "ACCESS" {
+            port 1/1/c1/1
+            ipv6 {
+                address 2001:db8:1::3 {
+                    prefix-length 64
+                }
+                vrrp 1 {
+                    backup [2001:db8:1::1]
+                    priority 100
+                    ping-reply true
+                }
+            }
+        }
+        interface "OUTSIDE" {
+            port 1/1/c2/1
+            ipv4 {
+                primary {
+                    address 192.0.2.5
+                    prefix-length 30
+                }
+            }
+        }
+        interface "ICL" {
+            port 1/1/c3/1
+            ipv4 {
+                primary {
+                    address 10.255.255.2
+                    prefix-length 30
+                }
+            }
+        }
+        interface "system" {
+            admin-state enable
+            ipv4 {
+                primary {
+                    address 10.0.0.3
+                    prefix-length 32
+                }
+            }
+        }
+        static-route-entry 10.192.3.0/24 {
+            next-hop 10.255.255.1 { }
+        }
+        isis 0 {
+            admin-state enable
+            level-capability 2
+            area-address [49.0001]
+            interface "OUTSIDE" { interface-type point-to-point }
+            interface "ICL" { interface-type point-to-point }
+            interface "system" { passive true }
+        }
+        nat {
+            inside {
+                large-scale {
+                    nat-policy "dslite-policy"
+                    dual-stack-lite {
+                        admin-state enable
+                        subscriber-prefix-length 128
+                        endpoint 2001:db8:1::1 {
+                            tunnel-mtu 1500
+                            reassembly false
+                            min-first-fragment-size-rx 1280
+                        }
+                    }
+                }
+            }
+            outside {
+                pool "dslite-pool" {
+                    admin-state enable
+                    type large-scale
+                    nat-group 1
+                    mode auto
+                    port-reservation {
+                        ports 200
+                    }
+                    watermarks {
+                        high 90
+                        low 80
+                    }
+                    large-scale {
+                        subscriber-limit 65535
+                        redundancy {
+                            admin-state disable
+                        }
+                    }
+                    address-range 203.0.113.1 end 203.0.113.254 { }
+                }
+            }
+        }
+    }
+    service {
+        nat {
+            syslog {
+                export-policy "dslite-syslog" {
+                    facility local6
+                    log-prefix "DSLITE-NAT"
+                    include {
+                        foreign-ip
+                        destination-ip
+                    }
+                    collector router-instance "Base" ip-address 172.18.0.104 {
+                        admin-state enable
+                        destination-port 1514
+                        ipv4-source-address 10.0.0.3
+                    }
+                }
+            }
+            nat-policy "dslite-policy" {
+                description "DS-Lite LSN policy"
+                block-limit 4
+                pool {
+                    router-instance "Base"
+                    name "dslite-pool"
+                }
+                timeouts {
+                    tcp-established {
+                        hrs 2
+                    }
+                    udp {
+                        normal 18000
+                        initial 240
+                    }
+                    icmp-query 60
+                }
+                flow-log-policy {
+                    syslog "dslite-syslog"
+                }
+            }
+        }
+    }
+    system {
+        name "CGNAT2"
+        grpc {
+            admin-state enable
+            allow-unsecure-connection
+        }
+        management-interface {
+            cli {
+                md-cli {
+                    auto-config-save true
+                }
+            }
+            netconf {
+                listen {
+                    admin-state enable
+                }
+            }
+        }
+    }
+}

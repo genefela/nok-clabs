@@ -1,0 +1,74 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Subscription
+metadata:
+  namespace: nok-cgnat
+  name: sros-nat-datapath-sample
+  labels:
+    type: cgnat
+spec:
+  paths:
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow/new-flow
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow/new-flow
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow/found-flow
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow/found-flow
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dslite/forward
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dslite/forward
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/no-resources
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/no-resources
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/no-ip-or-port-resources
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/no-ip-or-port-resources
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/no-host-resources
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/no-host-resources
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/max-flows-exceeded
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/max-flows-exceeded
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/flow-log-failed
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/flow-log-failed
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/port-range-log-failed
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/port-range-log-failed
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/dslite-unknown-aftr
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/dslite-unknown-aftr
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/unmatched-policy
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/unmatched-policy
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/transient-no-policy
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/transient-no-policy
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow/tcp-closed
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow/tcp-closed
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow-log/rate-limit-drop
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow-log/rate-limit-drop
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow-log/logged-flow-create
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow-log/logged-flow-create
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow-log/logged-flow-delete
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow-log/logged-flow-delete
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow-log/tx-packet
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow-log/tx-packet
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/receive-errors/ip-invalid-checksum
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/ip-invalid-checksum
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/receive-errors/tcp-udp-invalid-checksum
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/tcp-udp-invalid-checksum
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/receive-errors/dslite-unsupported-next-header
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/dslite-unsupported-next-header
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/receive-errors/ipv6-fragments-unsupported
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/ipv6-fragments-unsupported
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/receive-errors/ip-malformed-packet
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/ip-malformed-packet
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/reassembly-failed
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/reassembly-failed
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragment-buffers
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragment-buffers
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/fragment-list-expired
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/fragment-list-expired
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragments-per-packet
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragments-per-packet
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/general/mtu-exceeded
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/general/mtu-exceeded
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/upstream/value
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/upstream/value
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/upstream/max
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/upstream/max
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/downstream/value
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/downstream/value
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/downstream/max
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/downstream/max
+  mode: STREAM/SAMPLE
+  encoding: JSON
+  sampleInterval: 60s

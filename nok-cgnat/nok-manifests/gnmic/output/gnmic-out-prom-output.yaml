@@ -1,0 +1,14 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Output
+metadata:
+  namespace: nok-cgnat
+  name: prom-output
+  labels:
+    type: cgnat-ext-output
+spec:
+  type: prometheus
+  service:
+    annotations:
+      netopskube.io/bbm: "true"
+      netopskube.io/path: /metrics
+      netopskube.io/prober: http

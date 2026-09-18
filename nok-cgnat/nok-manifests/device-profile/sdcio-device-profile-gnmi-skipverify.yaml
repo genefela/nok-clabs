@@ -1,0 +1,11 @@
+apiVersion: inv.sdcio.dev/v1alpha1
+kind: TargetConnectionProfile
+metadata:
+  name: gnmi-skipverify
+  namespace: nok-cgnat
+spec:
+  port: 57400
+  protocol: gnmi
+  encoding: JSON
+  skipVerify: false
+  insecure: true  

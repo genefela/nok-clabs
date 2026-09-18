@@ -1,0 +1,34 @@
+apiVersion: operator.gnmic.dev/v1alpha1
+kind: Subscription
+metadata:
+  namespace: nok-cgnat
+  name: sros-nat-saturation-sample
+  labels:
+    type: cgnat
+spec:
+  paths:
+    - /state/isa/nat-group[id=*]/member[id=*]/session-usage
+    - /state/isa/nat-group[id=*]/member[id=*]/allocated-resources
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/flows/value
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/flows/value
+    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/flows/max
+    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/flows/max
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/ports/value
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/ports/max
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/port-ranges/used/value
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/port-ranges/used/max
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/large-scale-hosts/value
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/large-scale-hosts/max
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/ip-addresses/value
+    - /state/isa/nat-group[id=*]/member[id=*]/resources/ip-addresses/max
+    - /state/router[router-name=*]/nat/outside/pool[name=*]/large-scale/group-member[group-member=*]/block-usage
+    - /state/service/vprn[service-name=*]/nat/outside/pool[name=*]/large-scale/group-member[group-member=*]/block-usage
+    - /state/isa/nat-group[id=*]/redundancy/inter-chassis/health
+    - /state/isa/nat-group[id=*]/redundancy/inter-chassis/peer-health
+    - /state/isa/nat-group[id=*]/redundancy/inter-chassis/state-changes
+    - /state/isa/nat-group[id=*]/redundancy/inter-chassis/statistics/keepalive-timeouts
+    - /state/isa/nat-group[id=*]/member[id=*]/inter-chassis-redundancy/tracked-flows
+    - /state/isa/nat-group[id=*]/member[id=*]/inter-chassis-redundancy/tracked-flows-not-synced
+  mode: STREAM/SAMPLE
+  encoding: JSON
+  sampleInterval: 60s

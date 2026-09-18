@@ -1,0 +1,428 @@
+{
+  "id": null,
+  "uid": "cgnat-isa-icr",
+  "title": "CG-NAT ISA and ICR",
+  "tags": [
+    "cgnat",
+    "nat",
+    "sros"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "NAT events (duplicate + log-only)",
+        "datasource": {
+          "type": "loki",
+          "uid": "DS_LOKI"
+        },
+        "enable": true,
+        "expr": "{job=\"syslog\", application=\"NAT\", event_id=~\"2003|2014|2015|2023|2024|2025|2040|2043\"}",
+        "tagKeys": "event_id,source"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "A1 NAT group oper-state",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_oper_state",
+          "legendFormat": "{{source}} ng={{id}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "title": "A2 degraded",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_degraded",
+          "legendFormat": "{{source}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "F1 ICR health vs peer-health",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_redundancy_inter_chassis_health",
+          "legendFormat": "{{source}} health",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_redundancy_inter_chassis_peer_health",
+          "legendFormat": "{{source}} peer",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "B1 member session-usage (0-100)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_member_session_usage",
+          "legendFormat": "{{source}} member={{id}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "F2 tracked vs not-synced flows",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_member_inter_chassis_redundancy_tracked_flows",
+          "legendFormat": "{{source}} tracked",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_member_inter_chassis_redundancy_tracked_flows_not_synced",
+          "legendFormat": "{{source}} not-synced",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "B4 flows value/max (ESA)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_esa_resources_flows_value",
+          "legendFormat": "{{source}} value",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_esa_resources_flows_max",
+          "legendFormat": "{{source}} max",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "title": "B5\u2013B8 member resources",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_member_resources_ports_value",
+          "legendFormat": "{{source}} ports",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_member_resources_port_ranges_used_value",
+          "legendFormat": "{{source}} port-blocks",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_member_resources_large_scale_hosts_value",
+          "legendFormat": "{{source}} lsn-hosts",
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_member_resources_ip_addresses_value",
+          "legendFormat": "{{source}} outside-ip",
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "C1/C2/C3 flow + DS-Lite forward",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_flow_new_flow[1m])",
+          "legendFormat": "{{source}} new-flow",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_flow_found_flow[1m])",
+          "legendFormat": "{{source}} found-flow",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dslite_forward[1m])",
+          "legendFormat": "{{source}} dslite-fwd",
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "title": "D1 flow-create failed (capacity)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_no_resources[1m])",
+          "legendFormat": "{{source}} no-resources",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_no_ip_or_port_resources[1m])",
+          "legendFormat": "{{source}} no-ip-port",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dropped_flow_creation_failed_max_flows_exceeded[1m])",
+          "legendFormat": "{{source}} max-flows",
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 10,
+      "title": "local5 NAT events (correlate with graphs)",
+      "type": "logs",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "DS_LOKI"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"syslog\", application=\"NAT\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "DS_LOKI"
+          }
+        }
+      ]
+    }
+  ]
+}

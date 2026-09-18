@@ -1,0 +1,10 @@
+apiVersion: nok.dev/v1alpha1
+kind: NetworkHostTarget
+metadata:
+  name: clab-sros-cgnat-lan1
+  namespace: nok-cgnat
+spec:
+  address: 172.21.30.131
+  hostname: clab-sros-cgnat-lan1
+  commonLabels:
+    role: host

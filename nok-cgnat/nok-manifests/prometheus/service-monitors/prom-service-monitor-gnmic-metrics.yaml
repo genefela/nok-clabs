@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gnmic-metrics
+  namespace: nok-cgnat
+spec:
+  selector:
+    matchLabels:
+      operator.gnmic.dev/service-type: prometheus-output
+  namespaceSelector:
+    matchNames:
+      - nok-cgnat
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+

@@ -1,0 +1,320 @@
+{
+  "id": null,
+  "uid": "cgnat-pools-dslite",
+  "title": "CG-NAT pools and DS-Lite",
+  "tags": [
+    "cgnat",
+    "dslite"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "NAT events (duplicate + log-only)",
+        "datasource": {
+          "type": "loki",
+          "uid": "DS_LOKI"
+        },
+        "enable": true,
+        "expr": "{job=\"syslog\", application=\"NAT\", event_id=~\"2003|2014|2015|2023|2024|2025|2040|2043\"}",
+        "tagKeys": "event_id,source"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "B9 pool block-usage (0-100)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_router_nat_outside_pool_large_scale_group_member_block_usage",
+          "legendFormat": "{{source}} {{name}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "title": "B9 high-watermark-reached",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_router_nat_outside_pool_large_scale_group_member_high_watermark_reached",
+          "legendFormat": "{{source}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "B2 high-session-usage",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_member_high_session_usage",
+          "legendFormat": "{{source}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "C3 DS-Lite forwarded",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dslite_forward[1m])",
+          "legendFormat": "{{source}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "E1/E2 fragments + MTU",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dropped_fragments_reassembly_failed[1m])",
+          "legendFormat": "{{source}} reassembly",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_dropped_general_mtu_exceeded[1m])",
+          "legendFormat": "{{source}} mtu",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "E3 fragment buffers value/max",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "state_isa_nat_group_esa_resources_fragment_bufs_upstream_value",
+          "legendFormat": "{{source}} up value",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_esa_resources_fragment_bufs_upstream_max",
+          "legendFormat": "{{source}} up max",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "state_isa_nat_group_esa_resources_fragment_bufs_downstream_value",
+          "legendFormat": "{{source}} down value",
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "title": "D3/D4 flow-log pipeline",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "DS_PROMETHEUS"
+      },
+      "targets": [
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_flow_log_rate_limit_drop[1m])",
+          "legendFormat": "{{source}} rate-limit-drop",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_flow_log_logged_flow_create[1m])",
+          "legendFormat": "{{source}} logged-create",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        },
+        {
+          "expr": "rate(state_isa_nat_group_esa_statistics_nat_flow_log_tx_packet[1m])",
+          "legendFormat": "{{source}} tx-packet",
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "DS_PROMETHEUS"
+          }
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "NAT#2003 / 2037 under saturation",
+      "type": "logs",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "DS_LOKI"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"syslog\", application=\"NAT\", event_id=~\"2003|2037|2038|2014|2015\"}",
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "DS_LOKI"
+          }
+        }
+      ]
+    }
+  ]
+}

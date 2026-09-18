@@ -1,0 +1,24 @@
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: prometheus-datasource
+  namespace: nok-cgnat
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana" # Matches the label on your Grafana object
+  datasource:
+    name: Prometheus
+    type: prometheus
+    uid: DS_PROMETHEUS
+    access: proxy
+    url: http://prometheus-operated.nok-cgnat.svc.cluster.local:9090
+    jsonData:
+      httpMethod: POST
+      timeout: 60
+      manageAlerts: false
+      prometheusType: Prometheus
+      cacheLevel: 'High'
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
