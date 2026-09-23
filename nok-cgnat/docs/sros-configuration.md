@@ -16,7 +16,10 @@ not a lab dump. This recipe implements the DS-Lite + stateful ICR + syslog slice
 
 1. **ESA-VM BB** (`esa 1` / `vm 1`) as the NAT member. SRSIM cannot take `isa2-bb`
    MDAs; `active-mda-limit 1` matches the single VM (SICR forbids mixing intra-chassis
-   MDA spare with inter-chassis sync).
+   MDA spare with inter-chassis sync). The VM defaults to **admin disable** — the
+   startup-config must set `admin-state enable` on `esa 1 vm 1`. Host-ports need a
+   cable (topo `esa-stub`) plus hybrid/dot1q/802.1X tunneling or ESA stays
+   `provisioned` / health Unknown and the NAT group stays `transition`.
 2. **ISA nat-group 1** with `redundancy inter-chassis` enabled: keepalive 30/3,
    replication-threshold 50, flow-timeout-on-switchover 50, ip-mtu 9000,
    `local-ip-range-start` / `remote-ip-range-start` swapped on the peer,

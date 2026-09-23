@@ -10,7 +10,8 @@ spec:
     vendor: Nokia
     environment: lab
   sdcio:
-    enabled: true
+    # Lab: config-server datastore not ready; SDCIO gNMI reconnects wedge SR-SIM gRPC.
+    enabled: false
     credentialsSecretRef: device-credentials
     connectionProfileRef: gnmi-skipverify
     syncProfileRef: gnmi-get

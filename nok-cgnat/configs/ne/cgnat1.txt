@@ -20,10 +20,16 @@ configure {
     }
     esa 1 {
         admin-state enable
+        host-port 1/1/c4/1 {
+        }
+        host-port 1/1/c5/1 {
+        }
         vm 1 {
+            admin-state enable
             vm-type bb
             cores 4
             memory 8
+            host-port 1/1/c5/1
         }
     }
     isa {
@@ -33,7 +39,6 @@ configure {
             redundancy {
                 active-mda-limit 1
                 inter-chassis {
-                    admin-state enable
                     router-instance "Base"
                     local-ip-range-start 10.192.3.1
                     remote-ip-range-start 10.192.4.1
@@ -54,9 +59,7 @@ configure {
                     low 80
                 }
             }
-            esa 1 {
-                vm 1
-            }
+            esa 1 vm 1 { }
         }
     }
     log {
@@ -71,33 +74,8 @@ configure {
                 }
             }
         }
-        log-events {
-            nat {
-                event tmnxNatIsaGrpIsDegraded {
-                    severity critical
-                }
-                event tmnxNatMaxNbrSubsOrHostsExceeded {
-                    severity major
-                }
-                event tmnxNatPlLsnMemberBlockUsageHigh {
-                    severity major
-                }
-                event tmnxNatLsnSubIcmpPortUsgHigh {
-                    throttle true
-                }
-                event tmnxNatLsnSubUdpPortUsgHigh {
-                    throttle true
-                }
-                event tmnxNatLsnSubTcpPortUsgHigh {
-                    throttle true
-                }
-                event tmnxNatLsnSubSessionUsgHigh {
-                    throttle true
-                }
-            }
-        }
         syslog "nat-events" {
-            address 172.18.0.104
+            address 172.30.0.104
             facility local5
             severity info
             log-prefix "AFTR"
@@ -162,6 +140,34 @@ configure {
             mtu 9000
         }
     }
+    port 1/1/c4 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c4/1 {
+        admin-state enable
+        ethernet {
+            mode hybrid
+            encap-type dot1q
+            dot1x {
+                tunneling true
+            }
+        }
+    }
+    port 1/1/c5 {
+        admin-state enable
+        connector { breakout c1-100g }
+    }
+    port 1/1/c5/1 {
+        admin-state enable
+        ethernet {
+            mode hybrid
+            encap-type dot1q
+            dot1x {
+                tunneling true
+            }
+        }
+    }
     redundancy {
         multi-chassis {
             peer 10.0.0.3 {
@@ -181,12 +187,15 @@ configure {
     router "Base" {
         autonomous-system 65001
         interface "ACCESS" {
+            admin-state enable
             port 1/1/c1/1
             ipv6 {
                 address 2001:db8:1::2 {
                     prefix-length 64
+                    duplicate-address-detection false
                 }
                 vrrp 1 {
+                    admin-state enable
                     backup [2001:db8:1::1]
                     priority 200
                     ping-reply true
@@ -194,6 +203,7 @@ configure {
             }
         }
         interface "OUTSIDE" {
+            admin-state enable
             port 1/1/c2/1
             ipv4 {
                 primary {
@@ -203,6 +213,7 @@ configure {
             }
         }
         interface "ICL" {
+            admin-state enable
             port 1/1/c3/1
             ipv4 {
                 primary {
@@ -220,8 +231,10 @@ configure {
                 }
             }
         }
-        static-route-entry 10.192.4.0/24 {
-            next-hop 10.255.255.2 { }
+        static-routes {
+            route 10.192.4.0/24 route-type unicast {
+                next-hop 10.255.255.2 { }
+            }
         }
         isis 0 {
             admin-state enable
@@ -239,6 +252,11 @@ configure {
                         admin-state enable
                         subscriber-prefix-length 128
                         endpoint 2001:db8:1::1 {
+                            tunnel-mtu 1500
+                            reassembly false
+                            min-first-fragment-size-rx 1280
+                        }
+                        endpoint 2001:db8:1::2 {
                             tunnel-mtu 1500
                             reassembly false
                             min-first-fragment-size-rx 1280
@@ -280,7 +298,7 @@ configure {
                         foreign-ip
                         destination-ip
                     }
-                    collector router-instance "Base" ip-address 172.18.0.104 {
+                    collector router-instance "Base" ip-address 172.30.0.104 {
                         admin-state enable
                         destination-port 1514
                         ipv4-source-address 10.0.0.2
@@ -294,16 +312,6 @@ configure {
                     router-instance "Base"
                     name "dslite-pool"
                 }
-                timeouts {
-                    tcp-established {
-                        hrs 2
-                    }
-                    udp {
-                        normal 18000
-                        initial 240
-                    }
-                    icmp-query 60
-                }
                 flow-log-policy {
                     syslog "dslite-syslog"
                 }
@@ -315,6 +323,47 @@ configure {
         grpc {
             admin-state enable
             allow-unsecure-connection
+        }
+        security {
+            aaa {
+                local-profiles {
+                    profile "administrative" {
+                        default-action permit-all
+                    }
+                }
+            }
+            ssh {
+                server-cipher-list-v2 {
+                    cipher 190 { name aes256-ctr }
+                    cipher 192 { name aes192-ctr }
+                    cipher 194 { name aes128-ctr }
+                    cipher 200 { name aes128-cbc }
+                    cipher 205 { name 3des-cbc }
+                    cipher 225 { name aes192-cbc }
+                    cipher 230 { name aes256-cbc }
+                }
+                server-mac-list-v2 {
+                    mac 200 { name hmac-sha2-512 }
+                    mac 210 { name hmac-sha2-256 }
+                    mac 215 { name hmac-sha1 }
+                }
+            }
+            user-params {
+                local-user {
+                    user "admin" {
+                        password "$2y$10$o54xOZeJIbKM/dcTuXY7M.9qdWTkB8zGy7Q.lPJ/7mrRMuUWOqZJG"
+                        restricted-to-home false
+                        access {
+                            console true
+                            netconf true
+                            grpc true
+                        }
+                        console {
+                            member ["administrative"]
+                        }
+                    }
+                }
+            }
         }
         management-interface {
             cli {

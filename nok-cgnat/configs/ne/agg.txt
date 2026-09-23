@@ -21,7 +21,7 @@ configure {
             }
         }
         syslog "promtail" {
-            address 172.18.0.104
+            address 172.30.0.104
             facility local7
             severity info
             port 1514
@@ -98,6 +98,47 @@ configure {
         grpc {
             admin-state enable
             allow-unsecure-connection
+        }
+        security {
+            aaa {
+                local-profiles {
+                    profile "administrative" {
+                        default-action permit-all
+                    }
+                }
+            }
+            ssh {
+                server-cipher-list-v2 {
+                    cipher 190 { name aes256-ctr }
+                    cipher 192 { name aes192-ctr }
+                    cipher 194 { name aes128-ctr }
+                    cipher 200 { name aes128-cbc }
+                    cipher 205 { name 3des-cbc }
+                    cipher 225 { name aes192-cbc }
+                    cipher 230 { name aes256-cbc }
+                }
+                server-mac-list-v2 {
+                    mac 200 { name hmac-sha2-512 }
+                    mac 210 { name hmac-sha2-256 }
+                    mac 215 { name hmac-sha1 }
+                }
+            }
+            user-params {
+                local-user {
+                    user "admin" {
+                        password "$2y$10$o54xOZeJIbKM/dcTuXY7M.9qdWTkB8zGy7Q.lPJ/7mrRMuUWOqZJG"
+                        restricted-to-home false
+                        access {
+                            console true
+                            netconf true
+                            grpc true
+                        }
+                        console {
+                            member ["administrative"]
+                        }
+                    }
+                }
+            }
         }
         management-interface {
             cli {

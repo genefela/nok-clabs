@@ -125,6 +125,17 @@ topology:
       startup-delay: 25
       restart-policy: unless-stopped
 
+    # Dummy peers so ESA host-ports get a physical link. SR-SIM ESA stays
+    # "provisioned / health Unknown" when 1/1/c4 and 1/1/c5 have no cable.
+    esa-stub:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.30.141
+      binds:
+        - configs/hosts/esa-stub.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      restart-policy: unless-stopped
+
   links:
     # Access dual-home via L2 aggregation (CPEs + both CG-NATs)
     - endpoints: ["cgnat1:1/1/c1/1", "agg:1/1/c1/1"]
@@ -142,3 +153,8 @@ topology:
     - endpoints: ["inet:eth1", "core:1/1/c3/1"]
     # Inter-chassis link (CPM MCS + ISA-to-ISA flow sync)
     - endpoints: ["cgnat1:1/1/c3/1", "cgnat2:1/1/c3/1"]
+    # ESA host-ports (must be hybrid/dot1q in startup-config; need a peer for link-up)
+    - endpoints: ["cgnat1:1/1/c4/1", "esa-stub:eth1"]
+    - endpoints: ["cgnat1:1/1/c5/1", "esa-stub:eth2"]
+    - endpoints: ["cgnat2:1/1/c4/1", "esa-stub:eth3"]
+    - endpoints: ["cgnat2:1/1/c5/1", "esa-stub:eth4"]

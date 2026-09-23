@@ -10,7 +10,7 @@ spec:
     vendor: Nokia
     environment: lab
   sdcio:
-    enabled: true
+    enabled: false
     credentialsSecretRef: device-credentials
     connectionProfileRef: gnmi-skipverify
     syncProfileRef: gnmi-get

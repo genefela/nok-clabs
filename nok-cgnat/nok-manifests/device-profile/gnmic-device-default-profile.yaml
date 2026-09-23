@@ -6,7 +6,7 @@ metadata:
 spec:
   # Reference to a Secret containing username/password
   credentialsRef: device-credentials
-  # TLS without server certificate verification
-  #tls: {}
-  # Connection timeout
+  # Omit tls so gNMIc dials insecure (matches SR OS allow-unsecure-connection)
+  encoding: JSON
   timeout: 10s
+  retryTimer: 2s
