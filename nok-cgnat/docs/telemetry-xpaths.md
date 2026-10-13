@@ -18,6 +18,7 @@ Notation:
 | Symbol | Expands to |
 |--------|------------|
 | `NG` | `/state/isa/nat-group[id=*]` |
+| `NG1` | `/state/isa/nat-group[id=1]` (DS-Lite use-case in the three-group design) |
 | `DP` | `NG/mda[mda-id=*]` **or** `NG/esa[esa-id=*][vm=*]` (this lab uses ESA; both are subscribed) |
 | `RI` | `/state/router[router-name=*]` **or** `/state/service/vprn[service-name=*]` (this lab NATs in Base; both are subscribed) |
 
@@ -62,7 +63,10 @@ on the NAT group and the pool.
 |---|-------|------|
 | C1 | `nat_flow_created_total` | `DP/statistics/nat/flow/new-flow` |
 | C2 | `nat_flow_matched_total` | `DP/statistics/nat/flow/found-flow` |
-| C3 | `nat_dslite_forwarded_total` | `DP/statistics/nat/dslite/forward` |
+| C3 | `nat_dslite_forwarded_total` | `NG1/{mda[mda-id=*],esa[esa-id=*][vm=*]}/statistics/nat/dslite/forward` |
+
+C3 is scoped to NAT group 1, the DS-Lite group. The shared C1/C2 counters remain
+group-wide.
 
 ## D. Errors (60 s)
 
@@ -82,9 +86,13 @@ policy misses are configuration.
 
 | # | Alias | Path |
 |---|-------|------|
-| E1 | `nat_fragment_dropped_total{reason}` | `DP/statistics/nat/dropped/fragments/{reassembly-failed,too-many-fragment-buffers,fragment-list-expired,too-many-fragments-per-packet}` |
-| E2 | `nat_mtu_exceeded_total` | `DP/statistics/nat/dropped/general/mtu-exceeded` |
-| E3 | `nat_fragment_buffers{direction,value,max}` | `DP/resources/fragment-bufs/{upstream,downstream}/{value,max}` |
+| E1 | `nat_fragment_dropped_total{reason}` | `NG1/{mda[mda-id=*],esa[esa-id=*][vm=*]}/statistics/nat/dropped/fragments/{fragment-list-cleanup-in-progress,fragment-list-expired,reassembly-failed,too-many-fragment-buffers,too-many-fragment-holes,too-many-fragment-lists-for-flow,too-many-fragmented-packets,too-many-fragments-per-packet}` |
+| E2 | `nat_mtu_exceeded_total` | `NG1/{mda[mda-id=*],esa[esa-id=*][vm=*]}/statistics/nat/dropped/general/mtu-exceeded` |
+| E3 | `nat_fragment_buffers{direction,value,max}` | `NG1/{mda[mda-id=*],esa[esa-id=*][vm=*]}/resources/fragment-bufs/{upstream,downstream}/{value,max}` |
+
+E1-E3 are DS-Lite softwire metrics and are scoped to NAT group 1. The eight E1
+reasons are subscribed for both the MDA and ESA datapath variants; only the
+configured datapath type is expected to return series.
 
 ## F. Redundancy
 

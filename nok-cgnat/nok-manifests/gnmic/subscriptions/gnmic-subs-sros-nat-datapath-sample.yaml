@@ -11,8 +11,8 @@ spec:
     - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow/new-flow
     - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/flow/found-flow
     - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/flow/found-flow
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dslite/forward
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dslite/forward
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dslite/forward
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dslite/forward
     - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/no-resources
     - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/flow-creation-failed/no-resources
     - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/flow-creation-failed/no-ip-or-port-resources
@@ -51,24 +51,32 @@ spec:
     - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/ipv6-fragments-unsupported
     - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/receive-errors/ip-malformed-packet
     - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/receive-errors/ip-malformed-packet
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/reassembly-failed
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/reassembly-failed
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragment-buffers
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragment-buffers
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/fragment-list-expired
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/fragment-list-expired
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragments-per-packet
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragments-per-packet
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/statistics/nat/dropped/general/mtu-exceeded
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/statistics/nat/dropped/general/mtu-exceeded
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/upstream/value
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/upstream/value
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/upstream/max
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/upstream/max
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/downstream/value
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/downstream/value
-    - /state/isa/nat-group[id=*]/mda[mda-id=*]/resources/fragment-bufs/downstream/max
-    - /state/isa/nat-group[id=*]/esa[esa-id=*][vm=*]/resources/fragment-bufs/downstream/max
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/fragment-list-cleanup-in-progress
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/fragment-list-cleanup-in-progress
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/fragment-list-expired
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/fragment-list-expired
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/reassembly-failed
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/reassembly-failed
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragment-buffers
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragment-buffers
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragment-holes
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragment-holes
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragment-lists-for-flow
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragment-lists-for-flow
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragmented-packets
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragmented-packets
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/fragments/too-many-fragments-per-packet
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/fragments/too-many-fragments-per-packet
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/statistics/nat/dropped/general/mtu-exceeded
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/statistics/nat/dropped/general/mtu-exceeded
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/resources/fragment-bufs/upstream/value
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/resources/fragment-bufs/upstream/value
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/resources/fragment-bufs/upstream/max
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/resources/fragment-bufs/upstream/max
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/resources/fragment-bufs/downstream/value
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/resources/fragment-bufs/downstream/value
+    - /state/isa/nat-group[id=1]/mda[mda-id=*]/resources/fragment-bufs/downstream/max
+    - /state/isa/nat-group[id=1]/esa[esa-id=*][vm=*]/resources/fragment-bufs/downstream/max
   mode: STREAM/SAMPLE
   encoding: JSON
   sampleInterval: 60s
