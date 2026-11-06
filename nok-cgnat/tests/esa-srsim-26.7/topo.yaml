@@ -1,0 +1,27 @@
+name: sros-esa-probe
+
+mgmt:
+  network: esa-probe
+  ipv4-subnet: 172.21.50.0/24
+
+topology:
+  nodes:
+    router:
+      kind: nokia_srsim
+      image: registry.srlinux.dev/pub/nokia_srsim:26.7.R1
+      type: sr-1s
+      license: srsim-lic-26.7.txt
+      mgmt-ipv4: 172.21.50.11
+      startup-config: esa.cfg
+      group: ne
+
+    esa-peer:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.50.12
+      cmd: "sh -c 'ip link set eth1 up; ip link set eth2 up; exec sleep infinity'"
+      group: linux
+
+  links:
+    - endpoints: ["router:1/1/c4/1", "esa-peer:eth1"]
+    - endpoints: ["router:1/1/c5/1", "esa-peer:eth2"]
