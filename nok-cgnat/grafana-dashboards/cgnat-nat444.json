@@ -1,0 +1,63 @@
+{
+  "uid": "cgnat-nat444",
+  "title": "CG-NAT NAT444 - ISA diagnostic, ESA pending",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["cgnat", "nat444"],
+  "refresh": "10s",
+  "time": {"from": "now-15m", "to": "now"},
+  "panels": [
+    {
+      "id": 1, "title": "NAT444 group 2 state", "type": "stat",
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [{"refId": "A", "expr": "state_isa_nat_group_oper_state{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}"}],
+      "fieldConfig": {"defaults": {"mappings": [{"type": "value", "options": {"1": {"text": "Unknown", "color": "orange"}, "2": {"text": "In service", "color": "green"}, "3": {"text": "Down", "color": "red"}, "4": {"text": "Transition", "color": "orange"}}}]}, "overrides": []}
+    },
+    {
+      "id": 2, "title": "NAT444 degraded", "type": "stat",
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [{"refId": "A", "expr": "state_isa_nat_group_degraded{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}"}],
+      "fieldConfig": {"defaults": {"mappings": [{"type": "value", "options": {"0": {"text": "No", "color": "green"}, "1": {"text": "Yes", "color": "red"}}}]}, "overrides": []}
+    },
+    {
+      "id": 3, "title": "Current flow resources", "type": "stat",
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [{"refId": "A", "expr": "state_isa_nat_group_mda_resources_flows_value{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}"}]
+    },
+    {
+      "id": 4, "title": "Existing-flow packet matches / second", "type": "timeseries",
+      "gridPos": {"x": 0, "y": 5, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [{"refId": "A", "expr": "rate(state_isa_nat_group_mda_statistics_nat_flow_found_flow{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}[5m])", "legendFormat": "NAT444 matched packets"}],
+      "fieldConfig": {"defaults": {"unit": "pps"}, "overrides": []}
+    },
+    {
+      "id": 5, "title": "New flows / second", "type": "timeseries",
+      "gridPos": {"x": 12, "y": 5, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [{"refId": "A", "expr": "rate(state_isa_nat_group_mda_statistics_nat_flow_new_flow{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}[5m])", "legendFormat": "NAT444 new flows"}]
+    },
+    {
+      "id": 6, "title": "Flow resource usage and maximum", "type": "timeseries",
+      "gridPos": {"x": 0, "y": 13, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [
+        {"refId": "A", "expr": "state_isa_nat_group_mda_resources_flows_value{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}", "legendFormat": "value"},
+        {"refId": "B", "expr": "state_isa_nat_group_mda_resources_flows_max{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}", "legendFormat": "max"}
+      ]
+    },
+    {
+      "id": 7, "title": "Flow creation failures / second", "type": "timeseries",
+      "gridPos": {"x": 12, "y": 13, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "DS_PROMETHEUS"},
+      "targets": [
+        {"refId": "A", "expr": "rate(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_no_resources{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}[5m])", "legendFormat": "no resources"},
+        {"refId": "B", "expr": "rate(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_no_ip_or_port_resources{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}[5m])", "legendFormat": "no IP/port resources"},
+        {"refId": "C", "expr": "rate(state_isa_nat_group_mda_statistics_nat_dropped_flow_creation_failed_max_flows_exceeded{source=\"nok-cgnat/clab-sros-nat444-nat\",nat_group_id=\"2\"}[5m])", "legendFormat": "max flows exceeded"}
+      ]
+    }
+  ]
+}

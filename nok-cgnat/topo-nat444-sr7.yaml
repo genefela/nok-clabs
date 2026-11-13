@@ -1,0 +1,118 @@
+name: sros-nat444-sr7
+
+mgmt:
+  network: nat444-sr7
+  ipv4-subnet: 172.21.41.0/24
+
+topology:
+  kinds:
+    nokia_srsim:
+      license: srsim-lic-26.7.txt
+      image: registry.srlinux.dev/pub/nokia_srsim:26.7.R1
+
+  nodes:
+    nat-a:
+      kind: nokia_srsim
+      type: SR-7
+      mgmt-ipv4: 172.21.41.11
+      startup-config: configs/ne/nat444-sr7.txt
+      group: ne
+      env:
+        NOKIA_SROS_SLOT: A
+        NOKIA_SROS_CARD: cpm5
+        NOKIA_SROS_SFM: m-sfm6-7/12
+        NOKIA_SROS_SYSTEM_BASE_MAC: "1c:94:07:00:00:00"
+        NOKIA_SROS_ADDRESS_IPV4_ACTIVE: 172.21.41.11/24
+
+    nat-b:
+      kind: nokia_srsim
+      type: SR-7
+      network-mode: container:nat-a
+      group: ne-component
+      env:
+        NOKIA_SROS_SLOT: B
+        NOKIA_SROS_CARD: cpm5
+        NOKIA_SROS_SYSTEM_BASE_MAC: "1c:94:07:00:00:00"
+        NOKIA_SROS_ADDRESS_IPV4_ACTIVE: 172.21.41.11/24
+
+    nat-1:
+      kind: nokia_srsim
+      type: SR-7
+      network-mode: container:nat-a
+      group: ne-component
+      env:
+        NOKIA_SROS_SLOT: "1"
+        NOKIA_SROS_CARD: iom4-e
+        NOKIA_SROS_MDA_1: me6-10gb-sfp+
+        NOKIA_SROS_MDA_2: isa2-bb
+
+    access:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.41.20
+      exec:
+        - ip link add br0 type bridge
+        - ip link set br0 up
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set eth3 master br0
+        - ip link set eth1 up
+        - ip link set eth2 up
+        - ip link set eth3 up
+
+    cpe1:
+      kind: linux
+      image: nok-nat44-cpe:local
+      mgmt-ipv4: 172.21.41.121
+      env:
+        WAN4: 100.64.1.10/24
+        WAN_GW4: 100.64.1.1
+        WAN6: 2001:db8:700:1::10/64
+        WAN_GW6: 2001:db8:700:1::1
+        LAN6_CPE: 2001:db8:700:10::1/64
+        LAN6_CLIENT: 2001:db8:700:10::50/64
+        TCP_PORT: "5203"
+        UDP_PORT: "5303"
+        START_TRAFFIC: "no"
+      binds:
+        - configs/hosts/nat44-cpe.sh:/startup.sh
+      cmd: 'sh -c "sh /startup.sh; exec sleep infinity"'
+      startup-delay: 15
+
+    cpe2:
+      kind: linux
+      image: nok-nat44-cpe:local
+      mgmt-ipv4: 172.21.41.122
+      env:
+        WAN4: 100.64.1.11/24
+        WAN_GW4: 100.64.1.1
+        WAN6: 2001:db8:700:1::11/64
+        WAN_GW6: 2001:db8:700:1::1
+        LAN6_CPE: 2001:db8:700:11::1/64
+        LAN6_CLIENT: 2001:db8:700:11::50/64
+        TCP_PORT: "5204"
+        UDP_PORT: "5304"
+        START_TRAFFIC: "no"
+      binds:
+        - configs/hosts/nat44-cpe.sh:/startup.sh
+      cmd: 'sh -c "sh /startup.sh; exec sleep infinity"'
+      startup-delay: 15
+
+    inet:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool
+      mgmt-ipv4: 172.21.41.112
+      env:
+        INET_IPV4: 192.0.2.2/30
+        INET_GW4: 192.0.2.1
+        NAT_RETURN_PREFIX: ""
+      binds:
+        - configs/hosts/inet.sh:/startup.sh
+      cmd: 'sh -c "/startup.sh; exec sleep infinity"'
+      startup-delay: 10
+
+  links:
+    - endpoints: ["nat-1:e1-1-1", "access:eth1"]
+    - endpoints: ["cpe1:eth1", "access:eth2"]
+    - endpoints: ["cpe2:eth1", "access:eth3"]
+    - endpoints: ["nat-1:e1-1-2", "inet:eth1"]

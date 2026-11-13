@@ -18,6 +18,8 @@ LAN4_CLIENT="${LAN4_CLIENT:-192.168.1.50/24}"
 LAN4_PREFIX="${LAN4_PREFIX:-192.168.1.0/24}"
 SERVER4="${SERVER4:-192.0.2.2}"
 START_TRAFFIC="${START_TRAFFIC:-yes}"
+REVERSE_TCP_PORT="${REVERSE_TCP_PORT:-$((TCP_PORT + 1000))}"
+REVERSE_UDP_PORT="${REVERSE_UDP_PORT:-$((UDP_PORT + 1000))}"
 
 ip link set eth1 up
 ip addr flush dev eth1
@@ -67,7 +69,11 @@ echo "NAT44 CPE up: WAN=${WAN4} LAN=${LAN4_CLIENT} IPv6=${LAN6_CLIENT} namespace
 if [ "$START_TRAFFIC" = yes ]; then
   ip netns exec "$LAN_NS" ping -4 -i 0.5 -s 100 "$SERVER4" >/tmp/nat44-ping.log 2>&1 &
   ip netns exec "$LAN_NS" iperf3 -c "$SERVER4" -p "$UDP_PORT" -u -b 7.2k -l 100 \
-    --bidir -t 86400 >/tmp/nat44-udp.log 2>&1 &
+    -t 86400 --forceflush >/tmp/nat44-udp.log 2>&1 &
+  ip netns exec "$LAN_NS" iperf3 -c "$SERVER4" -p "$REVERSE_UDP_PORT" -u -b 7.2k -l 100 \
+    -R -t 86400 --forceflush >/tmp/nat44-udp-reverse.log 2>&1 &
   ip netns exec "$LAN_NS" iperf3 -c "$SERVER4" -p "$TCP_PORT" -b 7.2k -l 100 -N \
-    --bidir -t 86400 >/tmp/nat44-tcp.log 2>&1 &
+    -t 86400 --forceflush >/tmp/nat44-tcp.log 2>&1 &
+  ip netns exec "$LAN_NS" iperf3 -c "$SERVER4" -p "$REVERSE_TCP_PORT" -b 7.2k -l 100 -N \
+    -R -t 86400 --forceflush >/tmp/nat44-tcp-reverse.log 2>&1 &
 fi

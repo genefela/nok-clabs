@@ -1,0 +1,13 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: cgnat-nat444
+  namespace: nok-cgnat
+spec:
+  resyncPeriod: 1m
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  configMapRef:
+    name: cgnat-nat444-dashboard
+    key: dashboard.json

@@ -23,4 +23,7 @@ jobs:
       - name: Validate recipe artifacts
         run: python -m unittest discover -s nok-cgnat/tests -v
       - name: Check host scripts
-        run: sh -n nok-cgnat/configs/hosts/lan.sh nok-cgnat/configs/hosts/inet.sh nok-cgnat/configs/hosts/nat44-cpe.sh
+        run: |
+          for script in nok-cgnat/configs/hosts/*.sh; do
+            sh -n "$script"
+          done

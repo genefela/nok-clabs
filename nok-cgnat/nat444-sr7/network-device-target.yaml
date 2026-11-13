@@ -1,0 +1,24 @@
+apiVersion: nok.dev/v1alpha1
+kind: NetworkDeviceTarget
+metadata:
+  name: clab-sros-nat444-sr7-nat-a
+  namespace: nok-cgnat
+spec:
+  address: 172.21.41.11
+  hostname: clab-sros-nat444-sr7-nat-a
+  commonLabels:
+    vendor: Nokia
+    environment: lab
+    use-case: nat444-sr7
+  sdcio:
+    enabled: false
+    schema:
+      provider: sros.nokia.sdcio.dev
+      version: C-26.7.R1
+  gnmic:
+    enabled: true
+    credentialsSecretRef: device-credentials
+    targetProfileRef: default-profile
+    port: "57400"
+    labels:
+      role: cgnat

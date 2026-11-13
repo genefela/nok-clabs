@@ -1,0 +1,139 @@
+configure {
+    card 1 {
+        card-type iom-e
+        mda 1 { mda-type me6-10gb-sfp+ }
+        mda 2 { mda-type isa2-bb }
+    }
+    isa {
+        nat-group 2 {
+            admin-state enable
+            description "UC2 NAT444 isolated forwarding test"
+            redundancy { active-mda-limit 1 }
+            mda 1/2 { }
+        }
+    }
+    port 1/1/1 {
+        admin-state enable
+        ethernet { mode access encap-type null }
+    }
+    port 1/1/2 {
+        admin-state enable
+        ethernet { mode access encap-type null }
+    }
+    filter {
+        ip-filter "no-rfc6598-leak" {
+            filter-id 700
+            default-action accept
+            entry 10 {
+                match {
+                    src-ip { address 100.64.0.0/10 }
+                }
+                action { drop }
+            }
+        }
+    }
+    service {
+        customer "1" { }
+        vprn "500" {
+            admin-state enable
+            customer "1"
+            router-id 10.21.1.2
+            interface "to-internet" {
+                admin-state enable
+                ipv4 {
+                    primary { address 192.0.2.1 prefix-length 30 }
+                }
+                sap 1/1/2 {
+                    egress {
+                        filter { ip "no-rfc6598-leak" }
+                    }
+                }
+            }
+            nat {
+                outside {
+                    pool "nat444-pool" {
+                        admin-state enable
+                        type large-scale
+                        nat-group 2
+                        mode auto
+                        port-forwarding { range-end 1099 }
+                        port-reservation { ports 512 }
+                        large-scale {
+                            subscriber-limit 64
+                            redundancy { admin-state disable }
+                        }
+                        address-range 198.51.100.128 end 198.51.100.254 { }
+                    }
+                }
+            }
+        }
+        vprn "700" {
+            admin-state enable
+            customer "1"
+            router-id 10.21.1.2
+            interface "to-access" {
+                admin-state enable
+                ipv4 {
+                    primary { address 100.64.1.1 prefix-length 24 }
+                }
+                sap 1/1/1 { }
+            }
+            nat {
+                inside {
+                    large-scale {
+                        nat-policy "nat444-policy"
+                        nat44 {
+                            destination-prefix 0.0.0.0/0 { }
+                        }
+                    }
+                }
+            }
+        }
+        nat {
+            nat-policy "nat444-policy" {
+                pool { router-instance "500" name "nat444-pool" }
+                block-limit 4
+                udp { inbound-refresh true }
+            }
+        }
+    }
+    system {
+        name "NAT444"
+        grpc {
+            admin-state enable
+            allow-unsecure-connection
+        }
+        security {
+            aaa {
+                local-profiles {
+                    profile "administrative" { default-action permit-all }
+                }
+            }
+            ssh {
+                server-cipher-list-v2 {
+                    cipher 190 { name aes256-ctr }
+                    cipher 192 { name aes192-ctr }
+                    cipher 194 { name aes128-ctr }
+                }
+                server-mac-list-v2 {
+                    mac 200 { name hmac-sha2-512 }
+                    mac 210 { name hmac-sha2-256 }
+                }
+            }
+            user-params {
+                local-user {
+                    user "admin" {
+                        password "$2y$10$o54xOZeJIbKM/dcTuXY7M.9qdWTkB8zGy7Q.lPJ/7mrRMuUWOqZJG"
+                        restricted-to-home false
+                        access { console true netconf true grpc true }
+                        console { member ["administrative"] }
+                    }
+                }
+            }
+        }
+        management-interface {
+            cli { md-cli { auto-config-save true } }
+            netconf { listen { admin-state enable } }
+        }
+    }
+}

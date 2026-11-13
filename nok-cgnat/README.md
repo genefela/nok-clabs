@@ -1,6 +1,12 @@
-# CG-NAT recipe (DS-Lite + SICR)
+# CG-NAT recipe (NAT444 and DS-Lite)
 
 Containerlab + GitOps recipe for Nokia SR OS **carrier-grade NAT**, using **nok-bng as the template**.
+
+The SR7 + ISA NAT444 lab is available in `topo-nat444-sr7.yaml`: two
+overlapping customer LANs, CPE-side NAT44, provider NAT group 2, inside VPRN
+700, and outside VPRN 500. The earlier SR-1e proof remains in
+`topo-nat444.yaml`. See [NAT444 deployment and tests](docs/nat444.md).
+Native IPv6, the redundant pair, and the complete multi-use-case design remain open.
 
 Coverage:
 
@@ -98,6 +104,7 @@ should show A1/A2/F1/E1 without router CLI.
 - [Telemetry XPaths](docs/telemetry-xpaths.md)
 - [Log events and XPath correlation](docs/log-events.md)
 - [SROS configuration](docs/sros-configuration.md)
+- [NAT444 IPv4 lab, tests, and dashboard](docs/nat444.md)
 
 ## Multi-use-case design groundwork
 
@@ -131,7 +138,8 @@ For the design's Internet server, set `INET_IPV4=192.0.2.2/30`,
 for the NAT pools. The default values in `inet.sh` continue to serve the current
 DS-Lite lab.
 
-The script and additional iperf3 listeners are not wired into the default
-DS-Lite topology yet. The three-NAT-group topology requires an SR OS image and
-adapter layout capable of the 26.7 design; keep the validated SR-SIM 25.10
-DS-Lite lab as the default until that variant is assembled and validated.
+The script is wired into the separate SR-SIM 26.7 NAT444 IPv4 topology;
+the default `topo.yaml` remains DS-Lite. Forward and reverse traffic use
+separate sessions; reverse TCP/UDP ports default to the forward port plus 1000.
+The full redundant three-NAT-group topology and native IPv6 routing are not
+yet implemented by this isolated NAT444 variant.

@@ -10,9 +10,10 @@ spec:
     - matchLabels:
         vendor: Nokia
         role: cgnat
-  # SR-SIM sr-1s wedges gRPC with 4+ SAMPLE subs; Grafana A1 only needs oper-state.
   subscriptionRefs:
     - sros-nat-availability-refresh
+    - sros-nat-saturation-sample
+    - sros-nat-datapath-sample
   outputs:
     outputSelectors:
       - matchLabels:

@@ -11,4 +11,7 @@ promdata/*
 *lic*.txt
 clab-sros-bngt/
 clab-sros-cgnat/
+clab-sros-nat444/
+nok-cgnat/clab-sros-nat444-sr7/
+__pycache__/
 
